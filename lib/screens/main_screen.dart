@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home/home_screen.dart';
 import 'statistics/statistics_screen.dart';
-import 'share/share_screen.dart';
 import 'settings/settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -17,7 +16,6 @@ class _MainScreenState extends State<MainScreen> {
   final _screens = const [
     HomeScreen(),
     StatisticsScreen(),
-    ShareScreen(),
     SettingsScreen(),
   ];
 
@@ -45,11 +43,6 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.bar_chart_outlined),
             selectedIcon: Icon(Icons.bar_chart),
             label: '統計',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.share_outlined),
-            selectedIcon: Icon(Icons.share),
-            label: '共有',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings_outlined),

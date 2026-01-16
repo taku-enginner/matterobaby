@@ -46,6 +46,7 @@ class _ScheduleSettingsSheetState extends ConsumerState<ScheduleSettingsSheet> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
+                    tooltip: '閉じる',
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -76,17 +77,17 @@ class _ScheduleSettingsSheetState extends ConsumerState<ScheduleSettingsSheet> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
+                    color: colorScheme.secondary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: Colors.orange.shade700),
+                      Icon(Icons.info_outline, color: colorScheme.secondary),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           '週${_selectedWeekdays.length}日出勤 → 月約${(_selectedWeekdays.length * 4.3).round()}日',
-                          style: TextStyle(color: Colors.orange.shade700),
+                          style: TextStyle(color: colorScheme.secondary),
                         ),
                       ),
                     ],
@@ -120,18 +121,19 @@ class _ScheduleSettingsSheetState extends ConsumerState<ScheduleSettingsSheet> {
   }
 
   Widget _buildWeekdayChip(int weekday, String label) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isSelected = _selectedWeekdays.contains(weekday);
     return FilterChip(
       label: Text(
         label,
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: isSelected ? Colors.white : null,
+          color: isSelected ? colorScheme.onSecondary : null,
         ),
       ),
       selected: isSelected,
-      selectedColor: Colors.orange,
-      checkmarkColor: Colors.white,
+      selectedColor: colorScheme.secondary,
+      checkmarkColor: colorScheme.onSecondary,
       onSelected: (selected) {
         setState(() {
           if (selected) {

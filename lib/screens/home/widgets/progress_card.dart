@@ -32,7 +32,7 @@ class ProgressCard extends StatelessWidget {
                         backgroundColor: colorScheme.surfaceContainerHighest,
                         valueColor: AlwaysStoppedAnimation<Color>(
                           progress.goalAchieved
-                              ? Colors.green
+                              ? colorScheme.tertiary
                               : colorScheme.primary,
                         ),
                       ),
@@ -48,7 +48,7 @@ class ProgressCard extends StatelessWidget {
                                   ?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: progress.goalAchieved
-                                        ? Colors.green
+                                        ? colorScheme.tertiary
                                         : colorScheme.primary,
                                   ),
                             ),
@@ -91,7 +91,7 @@ class ProgressCard extends StatelessWidget {
                           '育休取得条件を満たしました',
                           style:
                               Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: Colors.green,
+                                    color: colorScheme.tertiary,
                                     fontWeight: FontWeight.bold,
                                   ),
                         ),
@@ -110,18 +110,18 @@ class ProgressCard extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: colorScheme.tertiary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.celebration, color: Colors.green),
-                      SizedBox(width: 8),
+                      Icon(Icons.celebration, color: colorScheme.tertiary),
+                      const SizedBox(width: 8),
                       Text(
                         'おめでとうございます!',
                         style: TextStyle(
-                          color: Colors.green,
+                          color: colorScheme.tertiary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

@@ -49,16 +49,6 @@ class SettingsNotifier extends StateNotifier<UserSettings?> {
     await updateSettings(updated);
   }
 
-  Future<void> setShareCode(String code) async {
-    if (state == null) return;
-
-    final updated = state!.copyWith(
-      shareCode: code,
-      shareCodeCreatedAt: DateTime.now(),
-    );
-    await updateSettings(updated);
-  }
-
   Future<void> setScheduledWeekdays(List<int> weekdays) async {
     if (state == null) return;
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../data/models/user_settings.dart';
 import '../../providers/settings_provider.dart';
 import '../../services/notification_service.dart';
 
@@ -13,6 +14,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _notificationService = NotificationService();
+  String? _notificationError;
 
   @override
   void initState() {
@@ -73,7 +75,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -101,17 +103,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           SwitchListTile(
             secondary: const Icon(Icons.notifications),
             title: const Text('リマインダー通知'),
-            subtitle: const Text('出勤目標を思い出すための通知'),
+            subtitle: _notificationError != null
+                ? Text(
+                    _notificationError!,
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  )
+                : const Text('出勤目標を思い出すための通知'),
             value: settings.notificationsEnabled,
             onChanged: (value) async {
+              setState(() => _notificationError = null);
               if (value) {
                 final granted = await _notificationService.requestPermission();
                 if (!granted) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('通知の許可が必要です')),
-                    );
-                  }
+                  setState(() => _notificationError = '通知の許可が必要です');
                   return;
                 }
               }
@@ -298,7 +302,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  void _scheduleNotifications(settings) {
+  void _scheduleNotifications(UserSettings settings) {
     _notificationService.scheduleWeeklyReminder(
       hour: settings.reminderHour,
       minute: settings.reminderMinute,

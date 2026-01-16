@@ -113,11 +113,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       color: colorScheme.primary,
                       shape: BoxShape.circle,
                     ),
-                    weekendTextStyle: const TextStyle(color: Colors.blue),
+                    weekendTextStyle: TextStyle(color: colorScheme.tertiary),
                   ),
                   daysOfWeekStyle: DaysOfWeekStyle(
                     weekdayStyle: TextStyle(color: colorScheme.onSurface),
-                    weekendStyle: const TextStyle(color: Colors.blue),
+                    weekendStyle: TextStyle(color: colorScheme.tertiary),
                   ),
                   calendarBuilders: CalendarBuilders(
                     defaultBuilder: (context, day, focusedDay) {
@@ -193,48 +193,60 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Row(
         children: [
           Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _editMode = EditMode.attendance),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: _editMode == EditMode.attendance
-                      ? colorScheme.primary
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '出勤実績',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
+            child: Semantics(
+              button: true,
+              label: '出勤実績モード',
+              selected: _editMode == EditMode.attendance,
+              child: InkWell(
+                onTap: () => setState(() => _editMode = EditMode.attendance),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
                     color: _editMode == EditMode.attendance
-                        ? colorScheme.onPrimary
-                        : colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.bold,
+                        ? colorScheme.primary
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '出勤実績',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: _editMode == EditMode.attendance
+                          ? colorScheme.onPrimary
+                          : colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
           Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _editMode = EditMode.schedule),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: _editMode == EditMode.schedule
-                      ? Colors.orange
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '出勤予定',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
+            child: Semantics(
+              button: true,
+              label: '出勤予定モード',
+              selected: _editMode == EditMode.schedule,
+              child: InkWell(
+                onTap: () => setState(() => _editMode = EditMode.schedule),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
                     color: _editMode == EditMode.schedule
-                        ? Colors.white
-                        : colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.bold,
+                        ? colorScheme.secondary
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '出勤予定',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: _editMode == EditMode.schedule
+                          ? colorScheme.onSecondary
+                          : colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -273,9 +285,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } else if (isRedDay) {
       textColor = Colors.red;
     } else if (isSaturday) {
-      textColor = Colors.blue;
+      textColor = colorScheme.tertiary;
     } else if (isScheduled) {
-      textColor = Colors.orange.shade800;
+      textColor = colorScheme.secondary;
     } else if (isToday) {
       textColor = colorScheme.primary;
     }
@@ -286,7 +298,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         color: isMarked
             ? colorScheme.primary
             : isScheduled && !isMarked
-                ? Colors.orange.withValues(alpha: 0.2)
+                ? colorScheme.secondary.withValues(alpha: 0.2)
                 : isToday
                     ? colorScheme.primaryContainer
                     : null,
@@ -294,7 +306,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         border: isToday
             ? Border.all(color: colorScheme.primary, width: 2)
             : isScheduled && !isMarked
-                ? Border.all(color: Colors.orange, width: 2)
+                ? Border.all(color: colorScheme.secondary, width: 2)
                 : null,
       ),
       child: Center(
@@ -320,7 +332,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           alignment: WrapAlignment.center,
           children: [
             _legendItem(colorScheme.primary, '出勤済み'),
-            _legendItem(Colors.orange.withValues(alpha: 0.2), '予定', borderColor: Colors.orange),
+            _legendItem(colorScheme.secondary.withValues(alpha: 0.2), '予定', borderColor: colorScheme.secondary),
           ],
         ),
       ),

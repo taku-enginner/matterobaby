@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import '../../core/constants/app_constants.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/settings_provider.dart';
@@ -50,7 +49,7 @@ class StatisticsScreen extends ConsumerWidget {
                     title: '達成月',
                     value: '$qualifyingMonths月',
                     icon: Icons.check_circle,
-                    color: Colors.green,
+                    color: colorScheme.tertiary,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -142,13 +141,13 @@ class StatisticsScreen extends ConsumerWidget {
                               getDrawingHorizontalLine: (value) {
                                 if (value == AppConstants.requiredDaysPerMonth) {
                                   return FlLine(
-                                    color: Colors.red.withOpacity(0.5),
+                                    color: colorScheme.error.withValues(alpha: 0.5),
                                     strokeWidth: 2,
                                     dashArray: [5, 5],
                                   );
                                 }
                                 return FlLine(
-                                  color: Colors.grey.withOpacity(0.2),
+                                  color: colorScheme.outlineVariant,
                                   strokeWidth: 1,
                                 );
                               },
@@ -161,7 +160,7 @@ class StatisticsScreen extends ConsumerWidget {
                                 barRods: [
                                   BarChartRodData(
                                     toY: entry.value.days.toDouble(),
-                                    color: isQualified ? Colors.green : colorScheme.primary,
+                                    color: isQualified ? colorScheme.tertiary : colorScheme.primary,
                                     width: 16,
                                     borderRadius: const BorderRadius.vertical(
                                       top: Radius.circular(4),
@@ -181,7 +180,7 @@ class StatisticsScreen extends ConsumerWidget {
                 Container(
                   width: 16,
                   height: 3,
-                  color: Colors.red.withOpacity(0.5),
+                  color: colorScheme.error.withValues(alpha: 0.5),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -211,14 +210,14 @@ class StatisticsScreen extends ConsumerWidget {
                   return ListTile(
                     leading: Icon(
                       isQualified ? Icons.check_circle : Icons.circle_outlined,
-                      color: isQualified ? Colors.green : Colors.grey,
+                      color: isQualified ? colorScheme.tertiary : colorScheme.outline,
                     ),
                     title: Text('${data.year}年${data.month}月'),
                     trailing: Text(
                       '${data.days}日',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: isQualified ? Colors.green : null,
+                        color: isQualified ? colorScheme.tertiary : null,
                       ),
                     ),
                   );

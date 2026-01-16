@@ -46,13 +46,13 @@ class MonthlyStatusCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.green,
+                      color: colorScheme.tertiary,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
+                    child: Text(
                       '達成!',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: colorScheme.onTertiary,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -73,7 +73,7 @@ class MonthlyStatusCard extends StatelessWidget {
                           minHeight: 12,
                           backgroundColor: colorScheme.surfaceContainerHighest,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.orange.withOpacity(0.3),
+                            colorScheme.secondary.withValues(alpha: 0.3),
                           ),
                         ),
                       ),
@@ -84,7 +84,7 @@ class MonthlyStatusCard extends StatelessWidget {
                           minHeight: 12,
                           backgroundColor: Colors.transparent,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            isQualified ? Colors.green : colorScheme.primary,
+                            isQualified ? colorScheme.tertiary : colorScheme.primary,
                           ),
                         ),
                       ),
@@ -96,7 +96,7 @@ class MonthlyStatusCard extends StatelessWidget {
                   '$daysWorked / ${AppConstants.requiredDaysPerMonth}日',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isQualified ? Colors.green : colorScheme.primary,
+                        color: isQualified ? colorScheme.tertiary : colorScheme.primary,
                       ),
                 ),
               ],
@@ -118,7 +118,7 @@ class MonthlyStatusCard extends StatelessWidget {
                   Text(
                     '予定: $daysScheduled日',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.orange.shade700,
+                          color: colorScheme.secondary,
                         ),
                   ),
               ],
