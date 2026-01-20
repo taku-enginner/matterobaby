@@ -31,7 +31,7 @@ class UserSettings extends HiveObject {
   @HiveField(8)
   final List<int> scheduledWeekdays;
 
-  @HiveField(9)
+  @HiveField(9, defaultValue: false)
   final bool hasSeenOnboarding;
 
   UserSettings({

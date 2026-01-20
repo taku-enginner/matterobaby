@@ -26,7 +26,7 @@ class UserSettingsAdapter extends TypeAdapter<UserSettings> {
       shareCode: fields[6] as String?,
       shareCodeCreatedAt: fields[7] as DateTime?,
       scheduledWeekdays: (fields[8] as List).cast<int>(),
-      hasSeenOnboarding: fields[9] as bool,
+      hasSeenOnboarding: fields[9] == null ? false : fields[9] as bool,
     );
   }
 
