@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/settings_provider.dart';
 import '../services/tutorial_service.dart';
+import 'checkin/checkin_screen.dart';
 import 'home/home_screen.dart';
 import 'statistics/statistics_screen.dart';
 import 'settings/settings_screen.dart';
@@ -19,6 +20,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   bool _tutorialStarted = false;
 
   final _screens = const [
+    CheckinScreen(),
     HomeScreen(),
     StatisticsScreen(),
     SettingsScreen(),
@@ -95,6 +97,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           });
         },
         destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.touch_app_outlined),
+            selectedIcon: Icon(Icons.touch_app),
+            label: '記録',
+          ),
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),

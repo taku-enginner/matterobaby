@@ -55,6 +55,15 @@ class AttendanceNotifier extends StateNotifier<List<AttendanceRecord>> {
     return state.map((r) => DateTime(r.date.year, r.date.month, r.date.day)).toSet();
   }
 
+  List<DateTime> getRecentRecords(int count) {
+    final sorted = List<AttendanceRecord>.from(state)
+      ..sort((a, b) => b.date.compareTo(a.date));
+    return sorted
+        .take(count)
+        .map((r) => DateTime(r.date.year, r.date.month, r.date.day))
+        .toList();
+  }
+
   String _formatDateKey(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }

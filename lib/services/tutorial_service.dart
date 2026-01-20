@@ -23,41 +23,47 @@ class TutorialService {
 
   final List<TutorialStep> _steps = [
     TutorialStep(
+      key: TutorialKeys.checkinButton,
+      title: '出勤記録ボタン',
+      description: 'このボタンをタップして\n今日の出勤を記録できます',
+      tabIndex: 0,
+    ),
+    TutorialStep(
       key: TutorialKeys.progressCard,
       title: '進捗表示',
       description: '育休取得に必要な12ヶ月のうち、\n達成した月数を表示します',
-      tabIndex: 0,
+      tabIndex: 1,
     ),
     TutorialStep(
       key: TutorialKeys.editModeSelector,
       title: '編集モード切替',
       description: '「出勤実績」で実際の出勤日を、\n「出勤予定」で予定を記録できます',
-      tabIndex: 0,
+      tabIndex: 1,
     ),
     TutorialStep(
       key: TutorialKeys.calendar,
       title: 'カレンダー',
       description: '日付をタップして出勤日を記録。\nもう一度タップで取り消し',
-      tabIndex: 0,
+      tabIndex: 1,
       align: ContentAlign.top,
     ),
     TutorialStep(
       key: TutorialKeys.scheduleSettingsButton,
       title: '予定設定',
       description: '毎週の出勤曜日を設定できます',
-      tabIndex: 0,
+      tabIndex: 1,
     ),
     TutorialStep(
       key: TutorialKeys.barChart,
       title: '月別グラフ',
       description: '月ごとの出勤日数を表示。\n11日以上で1ヶ月達成としてカウント',
-      tabIndex: 1,
+      tabIndex: 2,
     ),
     TutorialStep(
       key: TutorialKeys.periodStartDate,
       title: '開始日設定',
       description: '育休取得の基準となる\n2年間の開始日を設定',
-      tabIndex: 2,
+      tabIndex: 3,
     ),
   ];
 

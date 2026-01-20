@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 class TutorialKeys {
   TutorialKeys._();
 
+  // Checkin Screen
+  static final checkinButton = GlobalKey();
+
   // Home Screen
   static final progressCard = GlobalKey();
   static final editModeSelector = GlobalKey();
