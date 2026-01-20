@@ -22,17 +22,18 @@ class UserSettingsAdapter extends TypeAdapter<UserSettings> {
       weeklyGoalDays: fields[2] as int,
       reminderHour: fields[3] as int,
       reminderMinute: fields[4] as int,
-      reminderDays: (fields[5] as List?)?.cast<int>() ?? const [1, 2, 3, 4, 5],
+      reminderDays: (fields[5] as List).cast<int>(),
       shareCode: fields[6] as String?,
       shareCodeCreatedAt: fields[7] as DateTime?,
-      scheduledWeekdays: (fields[8] as List?)?.cast<int>() ?? const [],
+      scheduledWeekdays: (fields[8] as List).cast<int>(),
+      hasSeenOnboarding: fields[9] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserSettings obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.periodStartDate)
       ..writeByte(1)
@@ -50,7 +51,9 @@ class UserSettingsAdapter extends TypeAdapter<UserSettings> {
       ..writeByte(7)
       ..write(obj.shareCodeCreatedAt)
       ..writeByte(8)
-      ..write(obj.scheduledWeekdays);
+      ..write(obj.scheduledWeekdays)
+      ..writeByte(9)
+      ..write(obj.hasSeenOnboarding);
   }
 
   @override

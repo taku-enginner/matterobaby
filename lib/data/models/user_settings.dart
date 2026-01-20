@@ -31,6 +31,9 @@ class UserSettings extends HiveObject {
   @HiveField(8)
   final List<int> scheduledWeekdays;
 
+  @HiveField(9)
+  final bool hasSeenOnboarding;
+
   UserSettings({
     required this.periodStartDate,
     this.notificationsEnabled = false,
@@ -41,6 +44,7 @@ class UserSettings extends HiveObject {
     this.shareCode,
     this.shareCodeCreatedAt,
     this.scheduledWeekdays = const [],
+    this.hasSeenOnboarding = false,
   });
 
   DateTime get periodEndDate =>
@@ -56,6 +60,7 @@ class UserSettings extends HiveObject {
     String? shareCode,
     DateTime? shareCodeCreatedAt,
     List<int>? scheduledWeekdays,
+    bool? hasSeenOnboarding,
   }) {
     return UserSettings(
       periodStartDate: periodStartDate ?? this.periodStartDate,
@@ -67,6 +72,7 @@ class UserSettings extends HiveObject {
       shareCode: shareCode ?? this.shareCode,
       shareCodeCreatedAt: shareCodeCreatedAt ?? this.shareCodeCreatedAt,
       scheduledWeekdays: scheduledWeekdays ?? this.scheduledWeekdays,
+      hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
     );
   }
 }

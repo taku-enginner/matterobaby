@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../core/tutorial/tutorial_keys.dart';
 import '../../data/models/user_settings.dart';
 import '../../providers/settings_provider.dart';
 import '../../services/notification_service.dart';
@@ -43,6 +44,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         children: [
           _buildSectionHeader(context, '期間設定'),
           ListTile(
+            key: TutorialKeys.periodStartDate,
             leading: const Icon(Icons.calendar_month),
             title: const Text('開始日'),
             subtitle: Text(
@@ -168,6 +170,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ],
           const Divider(),
           _buildSectionHeader(context, 'その他'),
+          ListTile(
+            leading: const Icon(Icons.help_outline),
+            title: const Text('使い方を見る'),
+            subtitle: const Text('チュートリアルを再表示します'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _restartTutorial(context),
+          ),
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text('アプリについて'),
@@ -359,5 +368,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         }
       }
     }
+  }
+
+  void _restartTutorial(BuildContext context) {
+    ref.read(tutorialRestartRequestProvider.notifier).state = true;
   }
 }

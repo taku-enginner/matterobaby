@@ -56,6 +56,9 @@ dependencies:
   uuid: ^4.5.1
   intl: ^0.20.2
 
+  # Tutorial
+  tutorial_coach_mark: ^1.2.11
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -8,6 +8,8 @@ final settingsProvider =
   return SettingsNotifier();
 });
 
+final tutorialRestartRequestProvider = StateProvider<bool>((ref) => false);
+
 class SettingsNotifier extends StateNotifier<UserSettings?> {
   SettingsNotifier() : super(null);
 
@@ -53,6 +55,13 @@ class SettingsNotifier extends StateNotifier<UserSettings?> {
     if (state == null) return;
 
     final updated = state!.copyWith(scheduledWeekdays: weekdays);
+    await updateSettings(updated);
+  }
+
+  Future<void> markTutorialSeen() async {
+    if (state == null) return;
+
+    final updated = state!.copyWith(hasSeenOnboarding: true);
     await updateSettings(updated);
   }
 }

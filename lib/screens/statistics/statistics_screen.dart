@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/tutorial/tutorial_keys.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/settings_provider.dart';
 
@@ -71,15 +72,17 @@ class StatisticsScreen extends ConsumerWidget {
                   ),
             ),
             const SizedBox(height: 12),
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: SizedBox(
-                  height: 250,
-                  child: monthlyData.isEmpty
-                      ? const Center(child: Text('データがありません'))
-                      : BarChart(
+            KeyedSubtree(
+              key: TutorialKeys.barChart,
+              child: Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                    height: 250,
+                    child: monthlyData.isEmpty
+                        ? const Center(child: Text('データがありません'))
+                        : BarChart(
                           BarChartData(
                             alignment: BarChartAlignment.spaceAround,
                             maxY: 20,
@@ -171,6 +174,7 @@ class StatisticsScreen extends ConsumerWidget {
                             }).toList(),
                           ),
                         ),
+                  ),
                 ),
               ),
             ),

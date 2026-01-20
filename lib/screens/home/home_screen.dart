@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../../core/constants/japanese_holidays.dart';
+import '../../core/tutorial/tutorial_keys.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/schedule_provider.dart';
 import '../../providers/settings_provider.dart';
@@ -44,6 +45,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         actions: [
           IconButton(
+            key: TutorialKeys.scheduleSettingsButton,
             icon: const Icon(Icons.edit_calendar),
             tooltip: '予定設定',
             onPressed: () => _showScheduleSettings(context),
@@ -55,7 +57,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Column(
           children: [
             if (progress != null) ...[
-              ProgressCard(progress: progress),
+              KeyedSubtree(
+                key: TutorialKeys.progressCard,
+                child: ProgressCard(progress: progress),
+              ),
               const SizedBox(height: 16),
               MonthlyStatusCard(
                 year: _focusedDay.year,
@@ -73,13 +78,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(height: 16),
             ],
-            _buildEditModeSelector(colorScheme),
+            KeyedSubtree(
+              key: TutorialKeys.editModeSelector,
+              child: _buildEditModeSelector(colorScheme),
+            ),
             const SizedBox(height: 8),
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: TableCalendar(
+            KeyedSubtree(
+              key: TutorialKeys.calendar,
+              child: Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: TableCalendar(
                   locale: 'ja_JP',
                   firstDay: DateTime(2020, 1, 1),
                   lastDay: DateTime(2030, 12, 31),
@@ -172,6 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     titleTextFormatter: (date, locale) =>
                         DateFormat.yMMMM(locale).format(date),
                     headerPadding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
                   ),
                 ),
               ),

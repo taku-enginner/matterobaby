@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/settings_provider.dart';
+import '../services/tutorial_service.dart';
 import 'home/home_screen.dart';
 import 'statistics/statistics_screen.dart';
 import 'settings/settings_screen.dart';
 
-class MainScreen extends StatefulWidget {
+class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
+  final TutorialService _tutorialService = TutorialService();
+  bool _tutorialStarted = false;
 
   final _screens = const [
     HomeScreen(),
@@ -20,7 +25,63 @@ class _MainScreenState extends State<MainScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndStartTutorial();
+    });
+  }
+
+  @override
+  void dispose() {
+    _tutorialService.dispose();
+    super.dispose();
+  }
+
+  void _checkAndStartTutorial() {
+    final settings = ref.read(settingsProvider);
+    if (settings != null && !settings.hasSeenOnboarding && !_tutorialStarted) {
+      _startTutorial();
+    }
+  }
+
+  void _startTutorial() {
+    _tutorialStarted = true;
+    _tutorialService.showTutorial(
+      context: context,
+      onTabChange: (tabIndex) {
+        setState(() {
+          _currentIndex = tabIndex;
+        });
+      },
+      onFinish: () {
+        ref.read(settingsProvider.notifier).markTutorialSeen();
+        _tutorialStarted = false;
+      },
+      onSkip: () {
+        ref.read(settingsProvider.notifier).markTutorialSeen();
+        _tutorialStarted = false;
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Watch for tutorial restart requests
+    ref.listen<bool>(tutorialRestartRequestProvider, (previous, next) {
+      if (next && !_tutorialStarted) {
+        ref.read(tutorialRestartRequestProvider.notifier).state = false;
+        // Navigate to home tab first
+        setState(() {
+          _currentIndex = 0;
+        });
+        // Start tutorial after a short delay
+        Future.delayed(const Duration(milliseconds: 300), () {
+          _startTutorial();
+        });
+      }
+    });
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
