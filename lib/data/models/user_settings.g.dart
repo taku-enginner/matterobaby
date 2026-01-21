@@ -27,13 +27,18 @@ class UserSettingsAdapter extends TypeAdapter<UserSettings> {
       shareCodeCreatedAt: fields[7] as DateTime?,
       scheduledWeekdays: (fields[8] as List).cast<int>(),
       hasSeenOnboarding: fields[9] == null ? false : fields[9] as bool,
+      isEmploymentInsuranceEnrolled:
+          fields[10] == null ? false : fields[10] as bool,
+      employmentInsuranceEnrolledDate: fields[11] as DateTime?,
+      weeklyHoursGoal: fields[12] == null ? 20.0 : fields[12] as double,
+      defaultWorkHours: fields[13] == null ? 8.0 : fields[13] as double,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserSettings obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.periodStartDate)
       ..writeByte(1)
@@ -53,7 +58,15 @@ class UserSettingsAdapter extends TypeAdapter<UserSettings> {
       ..writeByte(8)
       ..write(obj.scheduledWeekdays)
       ..writeByte(9)
-      ..write(obj.hasSeenOnboarding);
+      ..write(obj.hasSeenOnboarding)
+      ..writeByte(10)
+      ..write(obj.isEmploymentInsuranceEnrolled)
+      ..writeByte(11)
+      ..write(obj.employmentInsuranceEnrolledDate)
+      ..writeByte(12)
+      ..write(obj.weeklyHoursGoal)
+      ..writeByte(13)
+      ..write(obj.defaultWorkHours);
   }
 
   @override

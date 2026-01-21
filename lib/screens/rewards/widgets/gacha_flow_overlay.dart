@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../providers/gacha_provider.dart';
 import '../../../providers/stamp_page_provider.dart';
 import 'gacha_result_dialog.dart';
@@ -257,11 +258,22 @@ class _GachaFlowOverlayState extends ConsumerState<GachaFlowOverlay>
 
   Widget _buildStampCardPhase(ColorScheme colorScheme) {
     final pages = ref.watch(stampPagesProvider);
-    // 最後の使用可能なページ（現在貯めているページ）を取得
-    final currentPage = pages.isNotEmpty ? pages.last : null;
+    // 全スタンプを収集し、未使用で古い順に stampsPerSpin 個を取得
+    final allUnusedSlots = <StampSlotData>[];
+    for (final page in pages) {
+      if (!page.isUsed) {
+        for (final slot in page.slots) {
+          if (slot.isStamped) {
+            allUnusedSlots.add(slot);
+          }
+        }
+      }
+    }
+    allUnusedSlots.sort((a, b) =>
+        (a.stampDate ?? DateTime(2000)).compareTo(b.stampDate ?? DateTime(2000)));
     final slots = widget.testMode
         ? _testStampSlots!
-        : (currentPage?.slots ?? []);
+        : allUnusedSlots.take(AppConstants.stampsPerSpin).toList();
 
     return Center(
       child: Container(

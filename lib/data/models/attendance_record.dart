@@ -16,11 +16,19 @@ class AttendanceRecord extends HiveObject {
   @HiveField(3, defaultValue: null)
   final String? usedForSpinId;
 
+  @HiveField(4, defaultValue: null)
+  final String? workplaceId;
+
+  @HiveField(5, defaultValue: null)
+  final double? workHours;
+
   AttendanceRecord({
     required this.id,
     required this.date,
     required this.createdAt,
     this.usedForSpinId,
+    this.workplaceId,
+    this.workHours,
   });
 
   bool get isUsed => usedForSpinId != null;
@@ -30,12 +38,16 @@ class AttendanceRecord extends HiveObject {
     DateTime? date,
     DateTime? createdAt,
     String? usedForSpinId,
+    String? workplaceId,
+    double? workHours,
   }) {
     return AttendanceRecord(
       id: id ?? this.id,
       date: date ?? this.date,
       createdAt: createdAt ?? this.createdAt,
       usedForSpinId: usedForSpinId ?? this.usedForSpinId,
+      workplaceId: workplaceId ?? this.workplaceId,
+      workHours: workHours ?? this.workHours,
     );
   }
 

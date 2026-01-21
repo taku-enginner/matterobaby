@@ -5,8 +5,8 @@ import '../providers/settings_provider.dart';
 import '../services/tutorial_service.dart';
 import 'checkin/checkin_screen.dart';
 import 'home/home_screen.dart';
-import 'rewards/rewards_screen.dart';
-import 'statistics/statistics_screen.dart';
+import 'stamp/stamp_card_screen.dart';
+import 'gacha/gacha_screen.dart';
 import 'settings/settings_screen.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
@@ -20,20 +20,18 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
   final TutorialService _tutorialService = TutorialService();
   bool _tutorialStarted = false;
-  late PageController _pageController;
 
   final _screens = const [
     CheckinScreen(),
     HomeScreen(),
-    RewardsScreen(),
-    StatisticsScreen(),
+    StampCardScreen(),
+    GachaScreen(),
     SettingsScreen(),
   ];
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: _currentIndex);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAndStartTutorial();
     });
@@ -41,17 +39,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   void dispose() {
-    _pageController.dispose();
     _tutorialService.dispose();
     super.dispose();
   }
 
   void _animateToPage(int index) {
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
     setState(() {
       _currentIndex = index;
     });
@@ -105,14 +97,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
 
     return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(), // スワイプ無効
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+      body: IndexedStack(
+        index: _currentIndex,
         children: _screens,
       ),
       bottomNavigationBar: NavigationBar(
@@ -127,19 +113,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             label: '記録',
           ),
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'ホーム',
+            icon: Icon(Icons.trending_up_outlined),
+            selectedIcon: Icon(Icons.trending_up),
+            label: '進捗',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.confirmation_number_outlined),
+            selectedIcon: Icon(Icons.confirmation_number),
+            label: 'スタンプ',
           ),
           NavigationDestination(
             icon: Icon(Icons.card_giftcard_outlined),
             selectedIcon: Icon(Icons.card_giftcard),
             label: 'ごほうび',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: '統計',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings_outlined),

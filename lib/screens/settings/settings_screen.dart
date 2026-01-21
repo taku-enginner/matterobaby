@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 import '../../core/tutorial/tutorial_keys.dart';
 import '../../data/models/user_settings.dart';
 import '../../providers/settings_provider.dart';
+import '../../providers/workplace_provider.dart';
 import '../../services/notification_service.dart';
+import 'workplace_management_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -35,12 +37,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        title: const Text('設定'),
-        centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-      ),
-      body: ListView(
+      body: SafeArea(
+        child: ListView(
         children: [
           _buildSectionHeader(context, '期間設定'),
           ListTile(
@@ -99,6 +97,50 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ],
               ),
             ),
+          ),
+          const Divider(),
+          _buildSectionHeader(context, '勤務設定'),
+          SwitchListTile(
+            secondary: const Icon(Icons.verified_user),
+            title: const Text('雇用保険加入済み'),
+            subtitle: Text(
+              settings.isEmploymentInsuranceEnrolled
+                  ? '育休取得条件（STEP2）を表示中'
+                  : '雇用保険加入条件（STEP1）を表示中',
+            ),
+            value: settings.isEmploymentInsuranceEnrolled,
+            onChanged: (value) async {
+              await ref.read(settingsProvider.notifier).setEmploymentInsuranceEnrolled(value);
+            },
+          ),
+          ListTile(
+            key: TutorialKeys.workplaceSettings,
+            leading: const Icon(Icons.business),
+            title: const Text('勤務先管理'),
+            subtitle: _buildWorkplaceSubtitle(ref),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const WorkplaceManagementScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.schedule),
+            title: const Text('週間勤務時間目標'),
+            subtitle: Text('${settings.weeklyHoursGoal.toStringAsFixed(0)}時間/週'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showWeeklyHoursGoalDialog(context, settings.weeklyHoursGoal),
+          ),
+          ListTile(
+            leading: const Icon(Icons.timer),
+            title: const Text('1日のデフォルト勤務時間'),
+            subtitle: Text('${settings.defaultWorkHours.toStringAsFixed(1)}時間'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showDefaultWorkHoursDialog(context, settings.defaultWorkHours),
           ),
           const Divider(),
           _buildSectionHeader(context, '通知設定'),
@@ -183,6 +225,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             subtitle: const Text('出勤カウント v1.0.0'),
           ),
         ],
+      ),
       ),
     );
   }
@@ -372,5 +415,127 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _restartTutorial(BuildContext context) {
     ref.read(tutorialRestartRequestProvider.notifier).state = true;
+  }
+
+  Widget _buildWorkplaceSubtitle(WidgetRef ref) {
+    final workplaces = ref.watch(workplaceProvider);
+    if (workplaces.isEmpty) {
+      return const Text('未登録');
+    }
+    return Text('${workplaces.length}件登録');
+  }
+
+  Future<void> _showWeeklyHoursGoalDialog(BuildContext context, double currentValue) async {
+    double selected = currentValue;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('週間勤務時間目標'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${selected.toStringAsFixed(0)}時間/週',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  Slider(
+                    value: selected,
+                    min: 10,
+                    max: 40,
+                    divisions: 30,
+                    label: '${selected.toStringAsFixed(0)}時間',
+                    onChanged: (value) {
+                      setState(() => selected = value);
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '雇用保険加入には週20時間以上の勤務が必要です',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('キャンセル'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await ref.read(settingsProvider.notifier).setWeeklyHoursGoal(selected);
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  child: const Text('保存'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showDefaultWorkHoursDialog(BuildContext context, double currentValue) async {
+    double selected = currentValue;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('1日のデフォルト勤務時間'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${selected.toStringAsFixed(1)}時間',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  Slider(
+                    value: selected,
+                    min: 1,
+                    max: 12,
+                    divisions: 22,
+                    label: '${selected.toStringAsFixed(1)}時間',
+                    onChanged: (value) {
+                      setState(() => selected = (value * 2).round() / 2); // 0.5時間刻み
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '記録時に時間を指定しない場合、この値が使用されます',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('キャンセル'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await ref.read(settingsProvider.notifier).setDefaultWorkHours(selected);
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  child: const Text('保存'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 }

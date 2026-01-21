@@ -52,13 +52,15 @@ class PointNotifier extends StateNotifier<PointState> {
   }
 
   void syncWithAttendance() {
-    final attendanceCount = _ref.read(attendanceProvider).length;
-    final storedSpinsUsed = (_box?.get('spinsUsed', defaultValue: 0) ?? 0) as int;
+    final attendance = _ref.read(attendanceProvider);
+    final attendanceCount = attendance.length;
+    // 未使用のスタンプ数をカウント
+    final unusedCount = attendance.where((r) => !r.isUsed).length;
 
     state = PointState(
       totalPoints: attendanceCount,
-      availablePoints: attendanceCount - (storedSpinsUsed * AppConstants.stampsPerSpin),
-      spinsUsed: storedSpinsUsed,
+      availablePoints: unusedCount,
+      spinsUsed: attendanceCount - unusedCount,
     );
   }
 

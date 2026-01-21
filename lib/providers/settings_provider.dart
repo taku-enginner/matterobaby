@@ -64,4 +64,31 @@ class SettingsNotifier extends StateNotifier<UserSettings?> {
     final updated = state!.copyWith(hasSeenOnboarding: true);
     await updateSettings(updated);
   }
+
+  /// 雇用保険加入状態を更新
+  Future<void> setEmploymentInsuranceEnrolled(bool enrolled) async {
+    if (state == null) return;
+
+    final updated = state!.copyWith(
+      isEmploymentInsuranceEnrolled: enrolled,
+      employmentInsuranceEnrolledDate: enrolled ? DateTime.now() : null,
+    );
+    await updateSettings(updated);
+  }
+
+  /// 週間勤務時間目標を更新
+  Future<void> setWeeklyHoursGoal(double hours) async {
+    if (state == null) return;
+
+    final updated = state!.copyWith(weeklyHoursGoal: hours);
+    await updateSettings(updated);
+  }
+
+  /// デフォルト勤務時間を更新
+  Future<void> setDefaultWorkHours(double hours) async {
+    if (state == null) return;
+
+    final updated = state!.copyWith(defaultWorkHours: hours);
+    await updateSettings(updated);
+  }
 }

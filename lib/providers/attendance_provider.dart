@@ -21,6 +21,21 @@ class AttendanceNotifier extends StateNotifier<List<AttendanceRecord>> {
     await _migrateExistingStamps();
   }
 
+  /// データをリロード
+  Future<void> reload() async {
+    if (_box != null && _box!.isOpen) {
+      state = _box!.values.toList();
+    } else {
+      await init();
+    }
+  }
+
+  /// すべてのデータをクリア
+  Future<void> clearAll() async {
+    await _box?.clear();
+    state = [];
+  }
+
   /// 既存のスタンプデータを移行（一度だけ実行）
   Future<void> _migrateExistingStamps() async {
     final pointBox = await Hive.openBox(AppConstants.pointBoxName);
@@ -101,6 +116,62 @@ class AttendanceNotifier extends StateNotifier<List<AttendanceRecord>> {
       await _box?.add(record);
       state = _box!.values.toList();
     }
+  }
+
+  /// 勤務記録を追加（勤務先・時間付き）
+  Future<AttendanceRecord> addWorkEntry({
+    required DateTime date,
+    String? workplaceId,
+    double? workHours,
+  }) async {
+    final record = AttendanceRecord(
+      id: _uuid.v4(),
+      date: DateTime(date.year, date.month, date.day),
+      createdAt: DateTime.now(),
+      workplaceId: workplaceId,
+      workHours: workHours,
+    );
+    await _box?.add(record);
+    state = _box!.values.toList();
+    return record;
+  }
+
+  /// 勤務記録を更新（勤務先・時間）
+  Future<void> updateWorkEntry({
+    required AttendanceRecord record,
+    String? workplaceId,
+    double? workHours,
+  }) async {
+    final updatedRecord = record.copyWith(
+      workplaceId: workplaceId,
+      workHours: workHours,
+    );
+    final key = record.key;
+    if (key != null) {
+      await _box?.put(key, updatedRecord);
+    }
+    state = _box!.values.toList();
+  }
+
+  /// 勤務記録を削除
+  Future<void> deleteWorkEntry(AttendanceRecord record) async {
+    await _box?.delete(record.key);
+    state = _box!.values.toList();
+  }
+
+  /// 特定の日付の記録を取得
+  List<AttendanceRecord> getRecordsForDate(DateTime date) {
+    final dateKey = _formatDateKey(date);
+    return state.where((r) => r.dateKey == dateKey).toList();
+  }
+
+  /// 週間の記録を取得
+  List<AttendanceRecord> getRecordsForWeek(DateTime weekStart) {
+    final weekEnd = weekStart.add(const Duration(days: 6));
+    return state.where((r) {
+      final d = DateTime(r.date.year, r.date.month, r.date.day);
+      return !d.isBefore(weekStart) && !d.isAfter(weekEnd);
+    }).toList();
   }
 
   int getDaysWorkedInMonth(int year, int month) {

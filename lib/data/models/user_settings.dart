@@ -34,6 +34,18 @@ class UserSettings extends HiveObject {
   @HiveField(9, defaultValue: false)
   final bool hasSeenOnboarding;
 
+  @HiveField(10, defaultValue: false)
+  final bool isEmploymentInsuranceEnrolled;
+
+  @HiveField(11, defaultValue: null)
+  final DateTime? employmentInsuranceEnrolledDate;
+
+  @HiveField(12, defaultValue: 20.0)
+  final double weeklyHoursGoal;
+
+  @HiveField(13, defaultValue: 8.0)
+  final double defaultWorkHours;
+
   UserSettings({
     required this.periodStartDate,
     this.notificationsEnabled = false,
@@ -45,6 +57,10 @@ class UserSettings extends HiveObject {
     this.shareCodeCreatedAt,
     this.scheduledWeekdays = const [],
     this.hasSeenOnboarding = false,
+    this.isEmploymentInsuranceEnrolled = false,
+    this.employmentInsuranceEnrolledDate,
+    this.weeklyHoursGoal = 20.0,
+    this.defaultWorkHours = 8.0,
   });
 
   DateTime get periodEndDate =>
@@ -61,6 +77,10 @@ class UserSettings extends HiveObject {
     DateTime? shareCodeCreatedAt,
     List<int>? scheduledWeekdays,
     bool? hasSeenOnboarding,
+    bool? isEmploymentInsuranceEnrolled,
+    DateTime? employmentInsuranceEnrolledDate,
+    double? weeklyHoursGoal,
+    double? defaultWorkHours,
   }) {
     return UserSettings(
       periodStartDate: periodStartDate ?? this.periodStartDate,
@@ -73,6 +93,10 @@ class UserSettings extends HiveObject {
       shareCodeCreatedAt: shareCodeCreatedAt ?? this.shareCodeCreatedAt,
       scheduledWeekdays: scheduledWeekdays ?? this.scheduledWeekdays,
       hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
+      isEmploymentInsuranceEnrolled: isEmploymentInsuranceEnrolled ?? this.isEmploymentInsuranceEnrolled,
+      employmentInsuranceEnrolledDate: employmentInsuranceEnrolledDate ?? this.employmentInsuranceEnrolledDate,
+      weeklyHoursGoal: weeklyHoursGoal ?? this.weeklyHoursGoal,
+      defaultWorkHours: defaultWorkHours ?? this.defaultWorkHours,
     );
   }
 }

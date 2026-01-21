@@ -11,6 +11,8 @@ class AppConstants {
   static const String rewardBoxName = 'rewards';
   static const String gachaHistoryBoxName = 'gacha_history';
   static const String pointBoxName = 'points';
+  static const String workplaceBoxName = 'workplaces';
 
   static const int stampsPerSpin = 3;
+  static const int stampCardSlots = 18; // 3列×6行
 }

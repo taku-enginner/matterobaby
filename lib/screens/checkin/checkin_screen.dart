@@ -8,9 +8,11 @@ import '../../core/tutorial/tutorial_keys.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/navigation_provider.dart';
 import '../../providers/point_provider.dart';
+import '../../providers/workplace_provider.dart';
 import '../rewards/widgets/stamp_overlay.dart';
 import 'widgets/checkin_button.dart';
 import 'widgets/ripple_effect.dart';
+import 'widgets/work_entry_sheet.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
   const CheckinScreen({super.key});
@@ -39,7 +41,22 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
 
   void _handleCheckin() async {
     final today = DateTime.now();
-    await ref.read(attendanceProvider.notifier).toggleDate(today);
+    final workplaces = ref.read(workplaceProvider);
+
+    // 勤務先が登録されている場合はシートを表示
+    if (workplaces.isNotEmpty) {
+      final result = await showWorkEntrySheet(context, date: today);
+      if (result == null) return; // キャンセルされた
+
+      await ref.read(attendanceProvider.notifier).addWorkEntry(
+            date: today,
+            workplaceId: result.workplaceId,
+            workHours: result.workHours,
+          );
+    } else {
+      // 勤務先がない場合は従来の動作
+      await ref.read(attendanceProvider.notifier).toggleDate(today);
+    }
 
     // Sync points with attendance
     ref.read(pointProvider.notifier).syncWithAttendance();
@@ -93,11 +110,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        title: const Text('出勤記録'),
-        centerTitle: true,
-        backgroundColor: colorScheme.primaryContainer,
-      ),
       // デバッグモードでのみスタンプアニメーションテストボタンを表示
       floatingActionButton: kDebugMode
           ? FloatingActionButton.small(

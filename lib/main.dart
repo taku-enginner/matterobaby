@@ -8,12 +8,14 @@ import 'data/models/gacha_history.dart';
 import 'data/models/reward.dart';
 import 'data/models/scheduled_work.dart';
 import 'data/models/user_settings.dart';
+import 'data/models/workplace.dart';
 import 'providers/attendance_provider.dart';
 import 'providers/gacha_provider.dart';
 import 'providers/point_provider.dart';
 import 'providers/reward_provider.dart';
 import 'providers/schedule_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/workplace_provider.dart';
 import 'screens/main_screen.dart';
 
 void main() async {
@@ -26,6 +28,7 @@ void main() async {
   Hive.registerAdapter(ScheduledWorkAdapter());
   Hive.registerAdapter(RewardAdapter());
   Hive.registerAdapter(GachaHistoryAdapter());
+  Hive.registerAdapter(WorkplaceAdapter());
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -84,6 +87,7 @@ class _AppInitializerState extends ConsumerState<AppInitializer> {
     await ref.read(rewardProvider.notifier).init();
     await ref.read(pointProvider.notifier).init();
     await ref.read(gachaHistoryProvider.notifier).init();
+    await ref.read(workplaceProvider.notifier).init();
     setState(() {
       _initialized = true;
     });

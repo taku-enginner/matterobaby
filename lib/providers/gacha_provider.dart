@@ -26,6 +26,12 @@ class GachaHistoryNotifier extends StateNotifier<List<GachaHistory>> {
     state = _box!.values.toList()..sort((a, b) => b.spunAt.compareTo(a.spunAt));
   }
 
+  /// すべてのデータをクリア
+  Future<void> clearAll() async {
+    await _box?.clear();
+    state = [];
+  }
+
   Reward? spinGacha(List<Reward> rewards) {
     if (rewards.isEmpty) return null;
 
