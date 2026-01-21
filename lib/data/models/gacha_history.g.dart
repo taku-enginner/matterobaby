@@ -1,41 +1,44 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'attendance_record.dart';
+part of 'gacha_history.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class AttendanceRecordAdapter extends TypeAdapter<AttendanceRecord> {
+class GachaHistoryAdapter extends TypeAdapter<GachaHistory> {
   @override
-  final int typeId = 0;
+  final int typeId = 4;
 
   @override
-  AttendanceRecord read(BinaryReader reader) {
+  GachaHistory read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return AttendanceRecord(
+    return GachaHistory(
       id: fields[0] as String,
-      date: fields[1] as DateTime,
-      createdAt: fields[2] as DateTime,
-      usedForSpinId: fields[3] as String?,
+      rewardId: fields[1] as String,
+      rewardName: fields[2] as String,
+      spunAt: fields[3] as DateTime,
+      isTestMode: fields[4] == null ? false : fields[4] as bool,
     );
   }
 
   @override
-  void write(BinaryWriter writer, AttendanceRecord obj) {
+  void write(BinaryWriter writer, GachaHistory obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.date)
+      ..write(obj.rewardId)
       ..writeByte(2)
-      ..write(obj.createdAt)
+      ..write(obj.rewardName)
       ..writeByte(3)
-      ..write(obj.usedForSpinId);
+      ..write(obj.spunAt)
+      ..writeByte(4)
+      ..write(obj.isTestMode);
   }
 
   @override
@@ -44,7 +47,7 @@ class AttendanceRecordAdapter extends TypeAdapter<AttendanceRecord> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AttendanceRecordAdapter &&
+      other is GachaHistoryAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

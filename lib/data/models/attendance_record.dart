@@ -13,11 +13,31 @@ class AttendanceRecord extends HiveObject {
   @HiveField(2)
   final DateTime createdAt;
 
+  @HiveField(3, defaultValue: null)
+  final String? usedForSpinId;
+
   AttendanceRecord({
     required this.id,
     required this.date,
     required this.createdAt,
+    this.usedForSpinId,
   });
+
+  bool get isUsed => usedForSpinId != null;
+
+  AttendanceRecord copyWith({
+    String? id,
+    DateTime? date,
+    DateTime? createdAt,
+    String? usedForSpinId,
+  }) {
+    return AttendanceRecord(
+      id: id ?? this.id,
+      date: date ?? this.date,
+      createdAt: createdAt ?? this.createdAt,
+      usedForSpinId: usedForSpinId ?? this.usedForSpinId,
+    );
+  }
 
   String get monthKey =>
       '${date.year}-${date.month.toString().padLeft(2, '0')}';

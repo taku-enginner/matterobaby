@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/navigation_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/tutorial_service.dart';
 import 'checkin/checkin_screen.dart';
 import 'home/home_screen.dart';
+import 'rewards/rewards_screen.dart';
 import 'statistics/statistics_screen.dart';
 import 'settings/settings_screen.dart';
 
@@ -18,10 +20,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
   final TutorialService _tutorialService = TutorialService();
   bool _tutorialStarted = false;
+  late PageController _pageController;
 
   final _screens = const [
     CheckinScreen(),
     HomeScreen(),
+    RewardsScreen(),
     StatisticsScreen(),
     SettingsScreen(),
   ];
@@ -29,6 +33,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: _currentIndex);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAndStartTutorial();
     });
@@ -36,8 +41,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   void dispose() {
+    _pageController.dispose();
     _tutorialService.dispose();
     super.dispose();
+  }
+
+  void _animateToPage(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+    setState(() {
+      _currentIndex = index;
+    });
   }
 
   void _checkAndStartTutorial() {
@@ -52,9 +69,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     _tutorialService.showTutorial(
       context: context,
       onTabChange: (tabIndex) {
-        setState(() {
-          _currentIndex = tabIndex;
-        });
+        _animateToPage(tabIndex);
       },
       onFinish: () {
         ref.read(settingsProvider.notifier).markTutorialSeen();
@@ -74,9 +89,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       if (next && !_tutorialStarted) {
         ref.read(tutorialRestartRequestProvider.notifier).state = false;
         // Navigate to home tab first
-        setState(() {
-          _currentIndex = 0;
-        });
+        _animateToPage(0);
         // Start tutorial after a short delay
         Future.delayed(const Duration(milliseconds: 300), () {
           _startTutorial();
@@ -84,17 +97,28 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       }
     });
 
+    // Watch for tab change requests (e.g., after check-in)
+    ref.listen<int>(tabIndexProvider, (previous, next) {
+      if (previous != next) {
+        _animateToPage(next);
+      }
+    });
+
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(), // スワイプ無効
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
         children: _screens,
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          _animateToPage(index);
         },
         destinations: const [
           NavigationDestination(
@@ -106,6 +130,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),
             label: 'ホーム',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.card_giftcard_outlined),
+            selectedIcon: Icon(Icons.card_giftcard),
+            label: 'ごほうび',
           ),
           NavigationDestination(
             icon: Icon(Icons.bar_chart_outlined),

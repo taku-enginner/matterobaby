@@ -101,7 +101,8 @@ flutter pub get
 # Step 2: iOS リリースビルド
 echo ""
 echo "🔨 Step 2/4: iOS IPAビルド..."
-flutter build ipa --release
+# TestFlight用: テストモードを有効化
+flutter build ipa --release --dart-define=ENABLE_TEST_MODE=true
 
 # IPA ファイルパスを取得
 IPA_PATH=$(find build/ios/ipa -name "*.ipa" -type f 2>/dev/null | head -1)

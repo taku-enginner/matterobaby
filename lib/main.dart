@@ -4,9 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'data/models/attendance_record.dart';
+import 'data/models/gacha_history.dart';
+import 'data/models/reward.dart';
 import 'data/models/scheduled_work.dart';
 import 'data/models/user_settings.dart';
 import 'providers/attendance_provider.dart';
+import 'providers/gacha_provider.dart';
+import 'providers/point_provider.dart';
+import 'providers/reward_provider.dart';
 import 'providers/schedule_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/main_screen.dart';
@@ -19,6 +24,8 @@ void main() async {
   Hive.registerAdapter(AttendanceRecordAdapter());
   Hive.registerAdapter(UserSettingsAdapter());
   Hive.registerAdapter(ScheduledWorkAdapter());
+  Hive.registerAdapter(RewardAdapter());
+  Hive.registerAdapter(GachaHistoryAdapter());
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -74,6 +81,9 @@ class _AppInitializerState extends ConsumerState<AppInitializer> {
     await ref.read(settingsProvider.notifier).init();
     await ref.read(attendanceProvider.notifier).init();
     await ref.read(scheduleProvider.notifier).init();
+    await ref.read(rewardProvider.notifier).init();
+    await ref.read(pointProvider.notifier).init();
+    await ref.read(gachaHistoryProvider.notifier).init();
     setState(() {
       _initialized = true;
     });

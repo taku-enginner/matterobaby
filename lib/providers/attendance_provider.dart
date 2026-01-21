@@ -18,7 +18,65 @@ class AttendanceNotifier extends StateNotifier<List<AttendanceRecord>> {
   Future<void> init() async {
     _box = await Hive.openBox<AttendanceRecord>(AppConstants.attendanceBoxName);
     state = _box!.values.toList();
+    await _migrateExistingStamps();
   }
+
+  /// 既存のスタンプデータを移行（一度だけ実行）
+  Future<void> _migrateExistingStamps() async {
+    final pointBox = await Hive.openBox(AppConstants.pointBoxName);
+    final spinsUsed = (pointBox.get('spinsUsed', defaultValue: 0) ?? 0) as int;
+    final migrated = (pointBox.get('stampsMigrated', defaultValue: false) ?? false) as bool;
+
+    if (migrated || spinsUsed == 0) return;
+
+    // 古い順にスタンプをソート
+    final sortedRecords = List<AttendanceRecord>.from(state)
+      ..sort((a, b) => a.date.compareTo(b.date));
+
+    // spinsUsed * 3 個の最古のスタンプを使用済みにマーク
+    final stampsToMark = spinsUsed * AppConstants.stampsPerSpin;
+    for (var i = 0; i < stampsToMark && i < sortedRecords.length; i++) {
+      final record = sortedRecords[i];
+      if (!record.isUsed) {
+        // マイグレーション用のプレースホルダーIDでマーク
+        final migrationSpinId = 'migration-${i ~/ AppConstants.stampsPerSpin}';
+        await _updateRecordSpinId(record, migrationSpinId);
+      }
+    }
+
+    await pointBox.put('stampsMigrated', true);
+    state = _box!.values.toList();
+  }
+
+  /// スタンプを使用済みにマーク
+  Future<void> markStampsAsUsed(String spinId, int count) async {
+    // 未使用スタンプを取得（古い順）
+    final unusedStamps = state
+        .where((r) => !r.isUsed)
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
+
+    // 指定された数だけマーク
+    final toMark = unusedStamps.take(count);
+    for (final record in toMark) {
+      await _updateRecordSpinId(record, spinId);
+    }
+
+    state = _box!.values.toList();
+  }
+
+  /// レコードのusedForSpinIdを更新
+  Future<void> _updateRecordSpinId(AttendanceRecord record, String spinId) async {
+    final updatedRecord = record.copyWith(usedForSpinId: spinId);
+    // Hiveでは同じキーに上書きする
+    final key = record.key;
+    if (key != null) {
+      await _box?.put(key, updatedRecord);
+    }
+  }
+
+  /// 未使用スタンプの数を取得
+  int get unusedStampCount => state.where((r) => !r.isUsed).length;
 
   bool isDateMarked(DateTime date) {
     final dateKey = _formatDateKey(date);

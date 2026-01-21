@@ -8,4 +8,9 @@ class AppConstants {
 
   static const String attendanceBoxName = 'attendance_records';
   static const String settingsBoxName = 'user_settings';
+  static const String rewardBoxName = 'rewards';
+  static const String gachaHistoryBoxName = 'gacha_history';
+  static const String pointBoxName = 'points';
+
+  static const int stampsPerSpin = 3;
 }

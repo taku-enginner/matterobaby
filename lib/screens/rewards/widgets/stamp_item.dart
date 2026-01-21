@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 class StampItem extends StatefulWidget {
   final bool isStamped;
+  final bool isUsed;
   final bool animate;
   final int index;
   final DateTime? stampDate;
@@ -12,6 +13,7 @@ class StampItem extends StatefulWidget {
   const StampItem({
     super.key,
     required this.isStamped,
+    this.isUsed = false,
     this.animate = false,
     required this.index,
     this.stampDate,
@@ -186,77 +188,86 @@ class _StampItemState extends State<StampItem>
                 width: 80,
                 height: 80,
                 padding: const EdgeInsets.all(8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                    border: Border.all(
-                      color: const Color(0xFFCC3333),
-                      width: 4,
-                    ),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Stack(
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        border: Border.all(
+                          color: const Color(0xFFCC3333),
+                          width: 4,
+                        ),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              widget.stampDate != null
-                                  ? DateFormat('M/d').format(widget.stampDate!)
-                                  : '${widget.index + 1}',
-                              style: GoogleFonts.kleeOne(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                height: 1.0,
-                                foreground: Paint()
-                                  ..style = PaintingStyle.stroke
-                                  ..strokeWidth = 3
-                                  ..color = const Color(0xFFCC3333),
-                              ),
+                            Stack(
+                              children: [
+                                Text(
+                                  widget.stampDate != null
+                                      ? DateFormat('M/d').format(widget.stampDate!)
+                                      : '${widget.index + 1}',
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: GoogleFonts.kleeOne(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.0,
+                                    foreground: Paint()
+                                      ..style = PaintingStyle.stroke
+                                      ..strokeWidth = 3
+                                      ..color = const Color(0xFFCC3333),
+                                  ),
+                                ),
+                                Text(
+                                  widget.stampDate != null
+                                      ? DateFormat('M/d').format(widget.stampDate!)
+                                      : '${widget.index + 1}',
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: GoogleFonts.kleeOne(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFFCC3333),
+                                    height: 1.0,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Text(
-                              widget.stampDate != null
-                                  ? DateFormat('M/d').format(widget.stampDate!)
-                                  : '${widget.index + 1}',
-                              style: GoogleFonts.kleeOne(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFFCC3333),
-                                height: 1.0,
+                            if (widget.stampDate != null)
+                              Stack(
+                                children: [
+                                  Text(
+                                    '出勤',
+                                    style: GoogleFonts.kleeOne(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.2,
+                                      foreground: Paint()
+                                        ..style = PaintingStyle.stroke
+                                        ..strokeWidth = 2
+                                        ..color = const Color(0xFFCC3333),
+                                    ),
+                                  ),
+                                  Text(
+                                    '出勤',
+                                    style: GoogleFonts.kleeOne(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFFCC3333),
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
                           ],
                         ),
-                        if (widget.stampDate != null)
-                          Stack(
-                            children: [
-                              Text(
-                                '出勤',
-                                style: GoogleFonts.kleeOne(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.2,
-                                  foreground: Paint()
-                                    ..style = PaintingStyle.stroke
-                                    ..strokeWidth = 2
-                                    ..color = const Color(0xFFCC3333),
-                                ),
-                              ),
-                              Text(
-                                '出勤',
-                                style: GoogleFonts.kleeOne(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFFCC3333),
-                                  height: 1.2,
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
+                      ),
                     ),
-                  ),
+                    // 取り消し線は StampCard レベルで描画するため削除
+                  ],
                 ),
               ),
             ),

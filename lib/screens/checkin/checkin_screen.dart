@@ -1,9 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:confetti/confetti.dart';
 import 'package:intl/intl.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/tutorial/tutorial_keys.dart';
 import '../../providers/attendance_provider.dart';
+import '../../providers/navigation_provider.dart';
+import '../../providers/point_provider.dart';
+import '../rewards/widgets/stamp_overlay.dart';
 import 'widgets/checkin_button.dart';
 import 'widgets/ripple_effect.dart';
 
@@ -36,15 +41,52 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     final today = DateTime.now();
     await ref.read(attendanceProvider.notifier).toggleDate(today);
 
+    // Sync points with attendance
+    ref.read(pointProvider.notifier).syncWithAttendance();
+
     // Trigger celebration effects
     _rippleKey.currentState?.startRipple();
     _confettiController.play();
+
+    // スタンプオーバーレイを表示
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      if (mounted) {
+        _showStampOverlay();
+      }
+    });
+  }
+
+  void _showStampOverlay() {
+    final pointState = ref.read(pointProvider);
+    showStampOverlay(
+      context,
+      currentStamps: pointState.currentStamps,
+      totalStamps: AppConstants.stampsPerSpin,
+      onComplete: () {
+        // オーバーレイ完了後にごほうびタブに移動
+        ref.read(tabIndexProvider.notifier).state = 2;
+      },
+    );
+  }
+
+  // デバッグ用：スタンプアニメーションをテスト
+  void _testStampAnimation() {
+    showStampOverlay(
+      context,
+      currentStamps: 3, // テスト用の値
+      totalStamps: AppConstants.stampsPerSpin,
+      onComplete: () {
+        // テスト時は遷移しない
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final attendance = ref.watch(attendanceProvider.notifier);
+    // 状態を監視して変更時に再ビルド
+    ref.watch(attendanceProvider);
+    final attendance = ref.read(attendanceProvider.notifier);
     final today = DateTime.now();
     final isCheckedIn = attendance.isDateMarked(today);
     final daysThisMonth = attendance.getDaysWorkedInMonth(today.year, today.month);
@@ -56,6 +98,14 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
         centerTitle: true,
         backgroundColor: colorScheme.primaryContainer,
       ),
+      // デバッグモードでのみスタンプアニメーションテストボタンを表示
+      floatingActionButton: kDebugMode
+          ? FloatingActionButton.small(
+              onPressed: _testStampAnimation,
+              tooltip: 'Test Stamp Animation',
+              child: const Icon(Icons.bug_report),
+            )
+          : null,
       body: Stack(
         children: [
           // Main content
