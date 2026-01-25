@@ -390,6 +390,7 @@ class _StampCardState extends ConsumerState<StampCard> {
                             animate: shouldAnimate,
                             size: stampSize,
                             stampDate: stampInfo?.slot.stampDate,
+                            rotationAngle: stampInfo?.stampRotation ?? 0.0,
                           ),
                         );
                       }),
@@ -435,6 +436,8 @@ class _StampInfo {
   final bool isUsed;
 
   _StampInfo({required this.slot, required this.isUsed});
+
+  double get stampRotation => slot.stampRotation;
 }
 
 /// 小さいスタンプ
@@ -443,12 +446,14 @@ class _MiniStamp extends StatelessWidget {
   final bool animate;
   final double size;
   final DateTime? stampDate;
+  final double rotationAngle;
 
   const _MiniStamp({
     required this.isStamped,
     required this.animate,
     required this.size,
     this.stampDate,
+    this.rotationAngle = 0.0,
   });
 
   @override
@@ -476,27 +481,30 @@ class _MiniStamp extends StatelessWidget {
       scale: animate ? 1.2 : 1.0,
       duration: const Duration(milliseconds: 300),
       curve: Curves.elasticOut,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-          border: Border.all(
-            color: const Color(0xFFCC3333),
-            width: 2,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            stampDate != null
-                ? '${stampDate!.month}/${stampDate!.day}'
-                : '✓',
-            maxLines: 1,
-            style: TextStyle(
-              fontSize: size * 0.22,
-              fontWeight: FontWeight.bold,
+      child: Transform.rotate(
+        angle: rotationAngle,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+            border: Border.all(
               color: const Color(0xFFCC3333),
+              width: 2,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              stampDate != null
+                  ? '${stampDate!.month}/${stampDate!.day}'
+                  : '✓',
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: size * 0.22,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFCC3333),
+              ),
             ),
           ),
         ),

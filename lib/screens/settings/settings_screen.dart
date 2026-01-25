@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/tutorial/tutorial_keys.dart';
 import '../../data/models/user_settings.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/workplace_provider.dart';
 import '../../services/notification_service.dart';
+import '../auth/auth_screen.dart';
 import 'workplace_management_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -224,10 +226,57 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: const Text('アプリについて'),
             subtitle: const Text('出勤カウント v1.0.0'),
           ),
+          const Divider(),
+          _buildSectionHeader(context, 'アカウント'),
+          ListTile(
+            leading: Icon(
+              Icons.logout,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            title: Text(
+              'ログアウト',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+            onTap: () => _showLogoutConfirmation(context),
+          ),
+          const SizedBox(height: 32),
         ],
       ),
       ),
     );
+  }
+
+  Future<void> _showLogoutConfirmation(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('ログアウト'),
+        content: const Text('ログアウトしますか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'ログアウト',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await ref.read(authProvider.notifier).signOut();
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const AuthScreen()),
+          (route) => false,
+        );
+      }
+    }
   }
 
   Widget _buildSectionHeader(BuildContext context, String title) {
@@ -316,21 +365,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           builder: (context, setState) {
             return AlertDialog(
               title: const Text('週間目標'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int i = 1; i <= 7; i++)
-                    RadioListTile<int>(
-                      title: Text('$i日/週'),
-                      value: i,
-                      groupValue: selected,
-                      onChanged: (value) {
-                        setState(() {
-                          selected = value!;
-                        });
-                      },
-                    ),
-                ],
+              content: RadioGroup<int>(
+                groupValue: selected,
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      selected = value;
+                    });
+                  }
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (int i = 1; i <= 7; i++)
+                      RadioListTile<int>(
+                        title: Text('$i日/週'),
+                        value: i,
+                      ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(

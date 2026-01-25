@@ -24,6 +24,7 @@ class CheckinScreen extends ConsumerStatefulWidget {
 class _CheckinScreenState extends ConsumerState<CheckinScreen> {
   late ConfettiController _confettiController;
   final GlobalKey<RippleEffectState> _rippleKey = GlobalKey();
+  double? _lastStampRotation;
 
   @override
   void initState() {
@@ -48,14 +49,18 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       final result = await showWorkEntrySheet(context, date: today);
       if (result == null) return; // キャンセルされた
 
-      await ref.read(attendanceProvider.notifier).addWorkEntry(
+      final record = await ref.read(attendanceProvider.notifier).addWorkEntry(
             date: today,
             workplaceId: result.workplaceId,
             workHours: result.workHours,
           );
+      _lastStampRotation = record.stampRotation;
     } else {
       // 勤務先がない場合は従来の動作
-      await ref.read(attendanceProvider.notifier).toggleDate(today);
+      final record = await ref.read(attendanceProvider.notifier).addWorkEntry(
+            date: today,
+          );
+      _lastStampRotation = record.stampRotation;
     }
 
     // Sync points with attendance
@@ -79,6 +84,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       context,
       currentStamps: pointState.currentStamps,
       totalStamps: AppConstants.stampsPerSpin,
+      stampRotation: _lastStampRotation,
       onComplete: () {
         // オーバーレイ完了後にごほうびタブに移動
         ref.read(tabIndexProvider.notifier).state = 2;

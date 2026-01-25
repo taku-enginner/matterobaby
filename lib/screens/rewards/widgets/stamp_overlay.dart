@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:confetti/confetti.dart';
@@ -8,12 +9,14 @@ class StampOverlay extends StatefulWidget {
   final int currentStamps; // 現在のスタンプ数（押した後）
   final int totalStamps; // 合計スタンプ数
   final VoidCallback onComplete;
+  final double? stampRotation; // スタンプの回転角度（nullの場合はランダム生成）
 
   const StampOverlay({
     super.key,
     required this.currentStamps,
     required this.totalStamps,
     required this.onComplete,
+    this.stampRotation,
   });
 
   @override
@@ -28,6 +31,7 @@ class _StampOverlayState extends State<StampOverlay>
   late AnimationController _textController;
   late AnimationController _blinkController;
   late ConfettiController _confettiController;
+  late double _stampRotation;
 
   late Animation<double> _cardScaleAnimation;
   late Animation<double> _cardOpacityAnimation;
@@ -42,9 +46,23 @@ class _StampOverlayState extends State<StampOverlay>
 
   bool _isReadyToTap = false;
 
+  /// スタンプの回転角度を生成
+  double _generateStampRotation() {
+    final random = Random();
+    if (random.nextDouble() < 0.05) {
+      // 5%の確率で逆さスタンプ (170° ~ 190°)
+      return pi + (random.nextDouble() - 0.5) * (20 * pi / 180);
+    }
+    // 通常: -15° ~ +15°
+    return (random.nextDouble() - 0.5) * (30 * pi / 180);
+  }
+
   @override
   void initState() {
     super.initState();
+
+    // スタンプの回転角度を設定（渡された場合はそれを使用、なければ生成）
+    _stampRotation = widget.stampRotation ?? _generateStampRotation();
 
     // カード表示アニメーション
     _cardController = AnimationController(
@@ -274,11 +292,13 @@ class _StampOverlayState extends State<StampOverlay>
                       ..rotateX(_stampRotationXAnimation.value),
                     child: Opacity(
                       opacity: _stampOpacityAnimation.value,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          // スタンプ本体（朱肉風）
-                          Container(
+                      child: Transform.rotate(
+                        angle: _stampRotation,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            // スタンプ本体（朱肉風）
+                            Container(
                               width: stampSize,
                               height: stampSize,
                               decoration: BoxDecoration(
@@ -347,8 +367,9 @@ class _StampOverlayState extends State<StampOverlay>
                                   ],
                                 ),
                               ),
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -535,6 +556,7 @@ Future<void> showStampOverlay(
   required int currentStamps,
   required int totalStamps,
   required VoidCallback onComplete,
+  double? stampRotation,
 }) {
   return showGeneralDialog(
     context: context,
@@ -544,6 +566,7 @@ Future<void> showStampOverlay(
       return StampOverlay(
         currentStamps: currentStamps,
         totalStamps: totalStamps,
+        stampRotation: stampRotation,
         onComplete: () {
           Navigator.of(context).pop();
           onComplete();
