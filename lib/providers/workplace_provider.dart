@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:uuid/uuid.dart';
-import '../core/constants/app_constants.dart';
+import '../data/datasources/workplace_datasource.dart';
 import '../data/models/workplace.dart';
 
 final workplaceProvider =
@@ -13,12 +11,11 @@ final workplaceProvider =
 class WorkplaceNotifier extends StateNotifier<List<Workplace>> {
   WorkplaceNotifier() : super([]);
 
-  Box<Workplace>? _box;
-  final _uuid = const Uuid();
+  final _datasource = WorkplaceDatasource();
 
   Future<void> init() async {
-    _box = await Hive.openBox<Workplace>(AppConstants.workplaceBoxName);
-    state = _box!.values.toList();
+    final data = await _datasource.getAll();
+    state = data.map((e) => Workplace.fromJson(e)).toList();
   }
 
   Future<Workplace> addWorkplace({
@@ -26,20 +23,17 @@ class WorkplaceNotifier extends StateNotifier<List<Workplace>> {
     required Color color,
     bool isDefault = false,
   }) async {
-    // 新しいデフォルトを追加する場合、既存のデフォルトを解除
     if (isDefault) {
-      await _clearDefaultFlag();
+      await _datasource.clearDefaultFlag();
     }
 
-    final workplace = Workplace(
-      id: _uuid.v4(),
+    final data = await _datasource.create(
       name: name,
       colorValue: color.toARGB32(),
-      createdAt: DateTime.now(),
       isDefault: isDefault,
     );
-    await _box?.add(workplace);
-    state = _box!.values.toList();
+    final workplace = Workplace.fromJson(data);
+    await init();
     return workplace;
   }
 
@@ -49,55 +43,28 @@ class WorkplaceNotifier extends StateNotifier<List<Workplace>> {
     required Color color,
     bool? isDefault,
   }) async {
-    // 新しいデフォルトを設定する場合、既存のデフォルトを解除
     if (isDefault == true && !workplace.isDefault) {
-      await _clearDefaultFlag();
+      await _datasource.clearDefaultFlag();
     }
 
-    final updated = workplace.copyWith(
-      name: name,
-      colorValue: color.toARGB32(),
-      isDefault: isDefault,
-    );
+    await _datasource.update(workplace.id, {
+      'name': name,
+      'color_value': color.toARGB32(),
+      if (isDefault != null) 'is_default': isDefault,
+    });
 
-    final index =
-        _box!.values.toList().indexWhere((w) => w.id == workplace.id);
-    if (index != -1) {
-      await _box!.putAt(index, updated);
-    }
-
-    state = _box!.values.toList();
+    await init();
   }
 
   Future<void> deleteWorkplace(Workplace workplace) async {
-    final index =
-        _box!.values.toList().indexWhere((w) => w.id == workplace.id);
-    if (index != -1) {
-      await _box!.deleteAt(index);
-    }
-    state = _box!.values.toList();
+    await _datasource.delete(workplace.id);
+    await init();
   }
 
   Future<void> setDefault(Workplace workplace) async {
-    await _clearDefaultFlag();
-
-    final updated = workplace.copyWith(isDefault: true);
-    final index =
-        _box!.values.toList().indexWhere((w) => w.id == workplace.id);
-    if (index != -1) {
-      await _box!.putAt(index, updated);
-    }
-
-    state = _box!.values.toList();
-  }
-
-  Future<void> _clearDefaultFlag() async {
-    final workplaces = _box!.values.toList();
-    for (var i = 0; i < workplaces.length; i++) {
-      if (workplaces[i].isDefault) {
-        await _box!.putAt(i, workplaces[i].copyWith(isDefault: false));
-      }
-    }
+    await _datasource.clearDefaultFlag();
+    await _datasource.update(workplace.id, {'is_default': true});
+    await init();
   }
 
   Workplace? getWorkplaceById(String? id) {

@@ -1,9 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:uuid/uuid.dart';
+import '../data/datasources/schedule_datasource.dart';
 import '../data/models/scheduled_work.dart';
-
-const _boxName = 'scheduled_work';
 
 final scheduleProvider =
     StateNotifierProvider<ScheduleNotifier, List<ScheduledWork>>((ref) {
@@ -13,12 +10,11 @@ final scheduleProvider =
 class ScheduleNotifier extends StateNotifier<List<ScheduledWork>> {
   ScheduleNotifier() : super([]);
 
-  Box<ScheduledWork>? _box;
-  final _uuid = const Uuid();
+  final _datasource = ScheduleDatasource();
 
   Future<void> init() async {
-    _box = await Hive.openBox<ScheduledWork>(_boxName);
-    state = _box!.values.toList();
+    final data = await _datasource.getAll();
+    state = data.map((e) => ScheduledWork.fromJson(e)).toList();
   }
 
   bool isDateScheduled(DateTime date) {
@@ -32,18 +28,12 @@ class ScheduleNotifier extends StateNotifier<List<ScheduledWork>> {
 
     if (existing.isNotEmpty) {
       for (final record in existing) {
-        await _box?.delete(record.key);
+        await _datasource.delete(record.id);
       }
-      state = _box!.values.toList();
     } else {
-      final record = ScheduledWork(
-        id: _uuid.v4(),
-        date: DateTime(date.year, date.month, date.day),
-        createdAt: DateTime.now(),
-      );
-      await _box?.add(record);
-      state = _box!.values.toList();
+      await _datasource.create(DateTime(date.year, date.month, date.day));
     }
+    await init();
   }
 
   Future<void> addDate(DateTime date) async {
@@ -51,13 +41,8 @@ class ScheduleNotifier extends StateNotifier<List<ScheduledWork>> {
     final existing = state.where((r) => r.dateKey == dateKey).toList();
 
     if (existing.isEmpty) {
-      final record = ScheduledWork(
-        id: _uuid.v4(),
-        date: DateTime(date.year, date.month, date.day),
-        createdAt: DateTime.now(),
-      );
-      await _box?.add(record);
-      state = _box!.values.toList();
+      await _datasource.create(DateTime(date.year, date.month, date.day));
+      await init();
     }
   }
 
@@ -66,9 +51,9 @@ class ScheduleNotifier extends StateNotifier<List<ScheduledWork>> {
     final existing = state.where((r) => r.dateKey == dateKey).toList();
 
     for (final record in existing) {
-      await _box?.delete(record.key);
+      await _datasource.delete(record.id);
     }
-    state = _box!.values.toList();
+    await init();
   }
 
   Set<DateTime> getScheduledDates() {

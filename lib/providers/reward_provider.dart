@@ -1,9 +1,8 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
-import '../core/constants/app_constants.dart';
+import '../data/datasources/reward_datasource.dart';
 import '../data/models/reward.dart';
-import '../services/image_storage_service.dart';
 
 final rewardProvider =
     StateNotifierProvider<RewardNotifier, List<Reward>>((ref) {
@@ -13,12 +12,12 @@ final rewardProvider =
 class RewardNotifier extends StateNotifier<List<Reward>> {
   RewardNotifier() : super([]);
 
-  Box<Reward>? _box;
+  final _datasource = RewardDatasource();
   final _uuid = const Uuid();
 
   Future<void> init() async {
-    _box = await Hive.openBox<Reward>(AppConstants.rewardBoxName);
-    state = _box!.values.toList();
+    final data = await _datasource.getAll();
+    state = data.map((e) => Reward.fromJson(e)).toList();
   }
 
   Future<void> addReward({
@@ -26,16 +25,23 @@ class RewardNotifier extends StateNotifier<List<Reward>> {
     String? memo,
     String? imagePath,
   }) async {
-    final reward = Reward(
-      id: _uuid.v4(),
+    String? imageUrl;
+    if (imagePath != null) {
+      final file = File(imagePath);
+      if (await file.exists()) {
+        final bytes = await file.readAsBytes();
+        final ext = imagePath.split('.').last;
+        final fileName = '${_uuid.v4()}.$ext';
+        imageUrl = await _datasource.uploadImage(fileName, bytes);
+      }
+    }
+
+    await _datasource.create(
       name: name,
       memo: memo,
-      imagePath: imagePath,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+      imageUrl: imageUrl,
     );
-    await _box?.add(reward);
-    state = _box!.values.toList();
+    await init();
   }
 
   Future<void> updateReward({
@@ -44,39 +50,38 @@ class RewardNotifier extends StateNotifier<List<Reward>> {
     String? memo,
     String? imagePath,
   }) async {
-    final oldImagePath = reward.imagePath;
-    final updated = Reward(
-      id: reward.id,
-      name: name,
-      memo: memo,
-      imagePath: imagePath ?? oldImagePath,
-      createdAt: reward.createdAt,
-      updatedAt: DateTime.now(),
-    );
+    String? imageUrl = reward.imagePath;
 
-    final index = _box!.values.toList().indexWhere((r) => r.id == reward.id);
-    if (index != -1) {
-      await _box!.putAt(index, updated);
+    if (imagePath != null && imagePath != reward.imagePath) {
+      // New image selected
+      final file = File(imagePath);
+      if (await file.exists()) {
+        final bytes = await file.readAsBytes();
+        final ext = imagePath.split('.').last;
+        final fileName = '${_uuid.v4()}.$ext';
+        imageUrl = await _datasource.uploadImage(fileName, bytes);
 
-      if (imagePath != null && oldImagePath != null && imagePath != oldImagePath) {
-        await ImageStorageService.deleteImage(oldImagePath);
+        // Delete old image
+        if (reward.imagePath != null) {
+          await _datasource.deleteImage(reward.imagePath!);
+        }
       }
     }
 
-    state = _box!.values.toList();
+    await _datasource.update(reward.id, {
+      'name': name,
+      'memo': memo,
+      'image_url': imageUrl,
+    });
+    await init();
   }
 
   Future<void> deleteReward(Reward reward) async {
     if (reward.imagePath != null) {
-      await ImageStorageService.deleteImage(reward.imagePath);
+      await _datasource.deleteImage(reward.imagePath!);
     }
-
-    final index = _box!.values.toList().indexWhere((r) => r.id == reward.id);
-    if (index != -1) {
-      await _box!.deleteAt(index);
-    }
-
-    state = _box!.values.toList();
+    await _datasource.delete(reward.id);
+    await init();
   }
 
   Reward? getRewardById(String id) {

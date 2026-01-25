@@ -1,8 +1,8 @@
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../core/constants/app_constants.dart';
+import '../data/datasources/gacha_datasource.dart';
 import '../data/models/gacha_history.dart';
 import '../data/models/reward.dart';
 import 'attendance_provider.dart';
@@ -17,18 +17,18 @@ final gachaHistoryProvider =
 class GachaHistoryNotifier extends StateNotifier<List<GachaHistory>> {
   GachaHistoryNotifier() : super([]);
 
-  Box<GachaHistory>? _box;
+  final _datasource = GachaDatasource();
   final _uuid = const Uuid();
   final _random = Random();
 
   Future<void> init() async {
-    _box = await Hive.openBox<GachaHistory>(AppConstants.gachaHistoryBoxName);
-    state = _box!.values.toList()..sort((a, b) => b.spunAt.compareTo(a.spunAt));
+    final data = await _datasource.getAll();
+    state = data.map((e) => GachaHistory.fromJson(e)).toList()
+      ..sort((a, b) => b.spunAt.compareTo(a.spunAt));
   }
 
-  /// すべてのデータをクリア
   Future<void> clearAll() async {
-    await _box?.clear();
+    await _datasource.deleteAll();
     state = [];
   }
 
@@ -39,19 +39,17 @@ class GachaHistoryNotifier extends StateNotifier<List<GachaHistory>> {
     return rewards[index];
   }
 
-  Future<void> recordSpin(Reward reward, {bool isTestMode = false, String? spinId}) async {
-    final history = GachaHistory(
-      id: spinId ?? _uuid.v4(),
+  Future<String> recordSpin(Reward reward, {bool isTestMode = false, String? spinId}) async {
+    final id = spinId ?? _uuid.v4();
+    await _datasource.create(
       rewardId: reward.id,
       rewardName: reward.name,
-      spunAt: DateTime.now(),
       isTestMode: isTestMode,
     );
-    await _box?.add(history);
-    state = _box!.values.toList()..sort((a, b) => b.spunAt.compareTo(a.spunAt));
+    await init();
+    return id;
   }
 
-  /// 新しいスピンIDを生成
   String generateSpinId() => _uuid.v4();
 
   List<GachaHistory> getRecentHistory(int count) {
@@ -79,7 +77,6 @@ class GachaService {
       final success = await _ref.read(pointProvider.notifier).useSpin();
       if (!success) return null;
 
-      // スピンIDを生成してスタンプを使用済みにマーク
       spinId = historyNotifier.generateSpinId();
       await _ref.read(attendanceProvider.notifier).markStampsAsUsed(
         spinId,

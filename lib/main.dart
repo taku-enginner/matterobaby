@@ -3,25 +3,28 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'core/config/supabase_config.dart';
 import 'data/models/attendance_record.dart';
 import 'data/models/gacha_history.dart';
 import 'data/models/reward.dart';
 import 'data/models/scheduled_work.dart';
 import 'data/models/user_settings.dart';
 import 'data/models/workplace.dart';
-import 'providers/attendance_provider.dart';
-import 'providers/gacha_provider.dart';
-import 'providers/point_provider.dart';
-import 'providers/reward_provider.dart';
-import 'providers/schedule_provider.dart';
-import 'providers/settings_provider.dart';
-import 'providers/workplace_provider.dart';
-import 'screens/main_screen.dart';
+import 'screens/splash/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await initializeDateFormatting('ja_JP', null);
+
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: SupabaseConfig.url,
+    anonKey: SupabaseConfig.anonKey,
+  );
+
+  // Initialize Hive (legacy - for migration)
   await Hive.initFlutter();
   Hive.registerAdapter(AttendanceRecordAdapter());
   Hive.registerAdapter(UserSettingsAdapter());
@@ -59,49 +62,7 @@ class MyApp extends StatelessWidget {
         Locale('en', 'US'),
       ],
       locale: const Locale('ja', 'JP'),
-      home: const AppInitializer(),
+      home: const SplashScreen(),
     );
-  }
-}
-
-class AppInitializer extends ConsumerStatefulWidget {
-  const AppInitializer({super.key});
-
-  @override
-  ConsumerState<AppInitializer> createState() => _AppInitializerState();
-}
-
-class _AppInitializerState extends ConsumerState<AppInitializer> {
-  bool _initialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initApp();
-  }
-
-  Future<void> _initApp() async {
-    await ref.read(settingsProvider.notifier).init();
-    await ref.read(attendanceProvider.notifier).init();
-    await ref.read(scheduleProvider.notifier).init();
-    await ref.read(rewardProvider.notifier).init();
-    await ref.read(pointProvider.notifier).init();
-    await ref.read(gachaHistoryProvider.notifier).init();
-    await ref.read(workplaceProvider.notifier).init();
-    setState(() {
-      _initialized = true;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_initialized) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-    return const MainScreen();
   }
 }

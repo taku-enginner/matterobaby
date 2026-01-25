@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import '../core/constants/app_constants.dart';
+import '../data/datasources/settings_datasource.dart';
 import '../data/models/user_settings.dart';
 
 final settingsProvider =
@@ -13,21 +12,28 @@ final tutorialRestartRequestProvider = StateProvider<bool>((ref) => false);
 class SettingsNotifier extends StateNotifier<UserSettings?> {
   SettingsNotifier() : super(null);
 
-  Box<UserSettings>? _box;
+  final _datasource = SettingsDatasource();
 
   Future<void> init() async {
-    _box = await Hive.openBox<UserSettings>(AppConstants.settingsBoxName);
-    if (_box!.isEmpty) {
-      final settings = UserSettings(periodStartDate: DateTime.now());
-      await _box!.add(settings);
+    try {
+      var data = await _datasource.getSettings();
+      // 設定が存在しない場合は作成
+      data ??= await _datasource.createSettings(
+        periodStartDate: DateTime.now(),
+      );
+      state = UserSettings.fromJson(data);
+    } catch (e) {
+      // エラー時はデフォルト設定を使用
+      state = UserSettings(periodStartDate: DateTime.now());
     }
-    state = _box!.values.first;
   }
 
   Future<void> updateSettings(UserSettings settings) async {
-    if (_box != null && _box!.isNotEmpty) {
-      final key = _box!.keys.first;
-      await _box!.put(key, settings);
+    try {
+      final data = await _datasource.updateSettings(settings.toJson());
+      state = UserSettings.fromJson(data);
+    } catch (e) {
+      // エラー時もローカル状態は更新
       state = settings;
     }
   }
@@ -59,13 +65,11 @@ class SettingsNotifier extends StateNotifier<UserSettings?> {
   }
 
   Future<void> markTutorialSeen() async {
-    if (state == null) return;
-
-    final updated = state!.copyWith(hasSeenOnboarding: true);
+    final current = state ?? UserSettings(periodStartDate: DateTime.now());
+    final updated = current.copyWith(hasSeenOnboarding: true);
     await updateSettings(updated);
   }
 
-  /// 雇用保険加入状態を更新
   Future<void> setEmploymentInsuranceEnrolled(bool enrolled) async {
     if (state == null) return;
 
@@ -76,7 +80,6 @@ class SettingsNotifier extends StateNotifier<UserSettings?> {
     await updateSettings(updated);
   }
 
-  /// 週間勤務時間目標を更新
   Future<void> setWeeklyHoursGoal(double hours) async {
     if (state == null) return;
 
@@ -84,7 +87,6 @@ class SettingsNotifier extends StateNotifier<UserSettings?> {
     await updateSettings(updated);
   }
 
-  /// デフォルト勤務時間を更新
   Future<void> setDefaultWorkHours(double hours) async {
     if (state == null) return;
 

@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import '../core/constants/app_constants.dart';
 import 'attendance_provider.dart';
 
@@ -37,7 +36,6 @@ final pointProvider =
 
 class PointNotifier extends StateNotifier<PointState> {
   final Ref _ref;
-  Box? _box;
 
   PointNotifier(this._ref)
       : super(PointState(
@@ -47,14 +45,12 @@ class PointNotifier extends StateNotifier<PointState> {
         ));
 
   Future<void> init() async {
-    _box = await Hive.openBox(AppConstants.pointBoxName);
     syncWithAttendance();
   }
 
   void syncWithAttendance() {
     final attendance = _ref.read(attendanceProvider);
     final attendanceCount = attendance.length;
-    // 未使用のスタンプ数をカウント
     final unusedCount = attendance.where((r) => !r.isUsed).length;
 
     state = PointState(
@@ -67,11 +63,8 @@ class PointNotifier extends StateNotifier<PointState> {
   Future<bool> useSpin() async {
     if (state.availableSpins < 1) return false;
 
-    final newSpinsUsed = state.spinsUsed + 1;
-    await _box?.put('spinsUsed', newSpinsUsed);
-
     state = state.copyWith(
-      spinsUsed: newSpinsUsed,
+      spinsUsed: state.spinsUsed + 1,
       availablePoints: state.availablePoints - AppConstants.stampsPerSpin,
     );
     return true;

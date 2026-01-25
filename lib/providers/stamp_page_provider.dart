@@ -11,12 +11,14 @@ class StampSlotData {
   final DateTime? stampDate;
   final bool isStamped;
   final bool isUsed;
+  final double stampRotation;
 
   const StampSlotData({
     required this.slotIndex,
     this.stampDate,
     required this.isStamped,
     required this.isUsed,
+    this.stampRotation = 0.0,
   });
 }
 
@@ -118,6 +120,7 @@ List<StampPageData> _computePages(
           stampDate: stampsForSpin[i].date,
           isStamped: true,
           isUsed: true,
+          stampRotation: stampsForSpin[i].stampRotation,
         ));
       } else {
         slots.add(StampSlotData(
@@ -157,6 +160,7 @@ List<StampPageData> _computePages(
           stampDate: unusedStamps[stampIdx].date,
           isStamped: true,
           isUsed: false,
+          stampRotation: unusedStamps[stampIdx].stampRotation,
         ));
       } else {
         currentSlots.add(StampSlotData(
