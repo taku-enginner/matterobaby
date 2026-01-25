@@ -31,4 +31,20 @@ class ScheduledWork extends HiveObject {
 
   @override
   int get hashCode => dateKey.hashCode;
+
+  factory ScheduledWork.fromJson(Map<String, dynamic> json) {
+    return ScheduledWork(
+      id: json['id'],
+      date: DateTime.parse(json['date']),
+      createdAt: DateTime.parse(json['created_at']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'date': date.toIso8601String().split('T')[0],
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
 }

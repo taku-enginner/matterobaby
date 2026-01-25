@@ -22,6 +22,9 @@ class AttendanceRecord extends HiveObject {
   @HiveField(5, defaultValue: null)
   final double? workHours;
 
+  @HiveField(6, defaultValue: 0.0)
+  final double stampRotation;
+
   AttendanceRecord({
     required this.id,
     required this.date,
@@ -29,6 +32,7 @@ class AttendanceRecord extends HiveObject {
     this.usedForSpinId,
     this.workplaceId,
     this.workHours,
+    this.stampRotation = 0.0,
   });
 
   bool get isUsed => usedForSpinId != null;
@@ -40,6 +44,7 @@ class AttendanceRecord extends HiveObject {
     String? usedForSpinId,
     String? workplaceId,
     double? workHours,
+    double? stampRotation,
   }) {
     return AttendanceRecord(
       id: id ?? this.id,
@@ -48,6 +53,7 @@ class AttendanceRecord extends HiveObject {
       usedForSpinId: usedForSpinId ?? this.usedForSpinId,
       workplaceId: workplaceId ?? this.workplaceId,
       workHours: workHours ?? this.workHours,
+      stampRotation: stampRotation ?? this.stampRotation,
     );
   }
 
@@ -66,4 +72,28 @@ class AttendanceRecord extends HiveObject {
 
   @override
   int get hashCode => dateKey.hashCode;
+
+  factory AttendanceRecord.fromJson(Map<String, dynamic> json) {
+    return AttendanceRecord(
+      id: json['id'],
+      date: DateTime.parse(json['date']),
+      createdAt: DateTime.parse(json['created_at']),
+      usedForSpinId: json['used_for_spin_id'],
+      workplaceId: json['workplace_id'],
+      workHours: (json['work_hours'] as num?)?.toDouble(),
+      stampRotation: (json['stamp_rotation'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'date': date.toIso8601String().split('T')[0],
+      'created_at': createdAt.toIso8601String(),
+      'used_for_spin_id': usedForSpinId,
+      'workplace_id': workplaceId,
+      'work_hours': workHours,
+      'stamp_rotation': stampRotation,
+    };
+  }
 }

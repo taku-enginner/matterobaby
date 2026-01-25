@@ -54,4 +54,26 @@ class Reward extends HiveObject {
 
   @override
   int get hashCode => id.hashCode;
+
+  factory Reward.fromJson(Map<String, dynamic> json) {
+    return Reward(
+      id: json['id'],
+      name: json['name'],
+      memo: json['memo'],
+      imagePath: json['image_url'],
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'memo': memo,
+      'image_url': imagePath,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+    };
+  }
 }

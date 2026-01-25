@@ -48,4 +48,24 @@ class Workplace extends HiveObject {
 
   @override
   int get hashCode => id.hashCode;
+
+  factory Workplace.fromJson(Map<String, dynamic> json) {
+    return Workplace(
+      id: json['id'],
+      name: json['name'],
+      colorValue: json['color_value'],
+      createdAt: DateTime.parse(json['created_at']),
+      isDefault: json['is_default'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'color_value': colorValue,
+      'created_at': createdAt.toIso8601String(),
+      'is_default': isDefault,
+    };
+  }
 }

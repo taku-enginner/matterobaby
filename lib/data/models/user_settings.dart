@@ -99,4 +99,40 @@ class UserSettings extends HiveObject {
       defaultWorkHours: defaultWorkHours ?? this.defaultWorkHours,
     );
   }
+
+  factory UserSettings.fromJson(Map<String, dynamic> json) {
+    return UserSettings(
+      periodStartDate: DateTime.parse(json['period_start_date']),
+      notificationsEnabled: json['notifications_enabled'] ?? false,
+      weeklyGoalDays: json['weekly_goal_days'] ?? 3,
+      reminderHour: json['reminder_hour'] ?? 9,
+      reminderMinute: json['reminder_minute'] ?? 0,
+      reminderDays: (json['reminder_days'] as List<dynamic>?)?.cast<int>() ?? [1, 2, 3, 4, 5],
+      scheduledWeekdays: (json['scheduled_weekdays'] as List<dynamic>?)?.cast<int>() ?? [],
+      hasSeenOnboarding: json['has_seen_onboarding'] ?? false,
+      isEmploymentInsuranceEnrolled: json['is_employment_insurance_enrolled'] ?? false,
+      employmentInsuranceEnrolledDate: json['employment_insurance_enrolled_date'] != null
+          ? DateTime.parse(json['employment_insurance_enrolled_date'])
+          : null,
+      weeklyHoursGoal: (json['weekly_hours_goal'] as num?)?.toDouble() ?? 20.0,
+      defaultWorkHours: (json['default_work_hours'] as num?)?.toDouble() ?? 8.0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'period_start_date': periodStartDate.toIso8601String().split('T')[0],
+      'notifications_enabled': notificationsEnabled,
+      'weekly_goal_days': weeklyGoalDays,
+      'reminder_hour': reminderHour,
+      'reminder_minute': reminderMinute,
+      'reminder_days': reminderDays,
+      'scheduled_weekdays': scheduledWeekdays,
+      'has_seen_onboarding': hasSeenOnboarding,
+      'is_employment_insurance_enrolled': isEmploymentInsuranceEnrolled,
+      'employment_insurance_enrolled_date': employmentInsuranceEnrolledDate?.toIso8601String().split('T')[0],
+      'weekly_hours_goal': weeklyHoursGoal,
+      'default_work_hours': defaultWorkHours,
+    };
+  }
 }

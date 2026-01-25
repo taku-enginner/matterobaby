@@ -36,4 +36,24 @@ class GachaHistory extends HiveObject {
 
   @override
   int get hashCode => id.hashCode;
+
+  factory GachaHistory.fromJson(Map<String, dynamic> json) {
+    return GachaHistory(
+      id: json['id'],
+      rewardId: json['reward_id'] ?? '',
+      rewardName: json['reward_name'],
+      spunAt: DateTime.parse(json['spun_at']),
+      isTestMode: json['is_test_mode'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'reward_id': rewardId,
+      'reward_name': rewardName,
+      'spun_at': spunAt.toIso8601String(),
+      'is_test_mode': isTestMode,
+    };
+  }
 }
