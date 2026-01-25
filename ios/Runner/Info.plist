@@ -52,5 +52,22 @@
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- Google Sign-In -->
+	<key>GIDClientID</key>
+	<string>1023118026968-2e8i58klhi4d6oq5b8r368jjc6ggte72.apps.googleusercontent.com</string>
+	<!-- Google Sign-In URL Scheme - iOS Client IDのreversed client ID -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- YOUR_IOS_CLIENT_ID を逆順にしたもの -->
+				<!-- 例: 123456789-abcdef.apps.googleusercontent.com → com.googleusercontent.apps.123456789-abcdef -->
+				<string>com.googleusercontent.apps.1023118026968-2e8i58klhi4d6oq5b8r368jjc6ggte72</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
